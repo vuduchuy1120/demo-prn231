@@ -1,0 +1,152 @@
+﻿@model IEnumerable<Demo_PRN231_SE1627.Models.Product>
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, AuthoringTagHelpers
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UnitPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UnitsInStock)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Image)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Category)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProductName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UnitPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UnitsInStock)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Image)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category.CategoryName)
+            </td>
+            <td>
+                    <button onclick="deleteProduct(@item.ProductId)">Delete</button>
+                    <button onclick="getProduct(@item.ProductId)">Edit</button>
+
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+<div>
+    <form>
+        <span>Code: </span> <input id="code" type="text" /> <br />
+        <span>Name: </span> <input id="name" type="text" /> <br />
+        <span>Stock: </span> <input id="stock" type="text" /> <br />
+        <span>Price: </span> <input id="price" type="text" /> <br />
+        <span>Image: </span> <input id="image" type="text" /> <br />
+        <span>Category: </span> <select class="form-control" id="category" asp-items="ViewBag.CategoryId"></select> <br />
+    </form>
+
+    <button type="button" onclick="addApi()">Add</button>
+    <button type="button" onclick="updateApi()">Update</button>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>
+    function deleteProduct(id) {
+        var result = confirm("Are you sure you want to delete this product?");
+        if (result) {
+            //delete right now if click oke not redirect to delete page by ajax
+            $.ajax({
+                url: "/Products/DeleteConfirmed?id=" + id,
+                method: "DELETE",
+                success: function (data) {
+                    if (data.success) {
+                        window.location.href = "/Products/Index";
+                    }
+                }
+            });
+
+        }
+    }
+    
+    function getProduct(id) {
+        $.ajax({
+            url: "/Products/GetProduct?id=" + id,
+            method: "GET",
+            success: function (data) {
+                $("#code").val(data.productId);
+                $("#name").val(data.productName);
+                $("#stock").val(data.unitsInStock);
+                $("#price").val(data.unitPrice);
+                $("#image").val(data.image);
+                $("#category").val(data.categoryId);
+            }
+        });
+    }
+    function updateApi (){
+        var product = {
+            "ProductId": $("#code").val(),
+            "ProductName": $("#name").val(),
+            "UnitsInStock": $("#stock").val(),
+            "UnitPrice": $("#price").val(),
+            "Image": $("#image").val(),
+            "CategoryId": $("#category").val()
+        };
+        $.ajax({
+            url: "/Products/UpdateApi",
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(product),
+            success: function (data) {
+                alert("Update success");
+                window.location.reload();
+            }
+        });
+    }
+    function addApi() { 
+        var product = {
+            "ProductName": $("#name").val(),
+            "UnitsInStock": $("#stock").val(),
+            "UnitPrice": $("#price").val(),
+            "Image": $("#image").val(),
+            "CategoryId": $("#category").val()
+        }
+        $.ajax({
+            url: "/Products/AddApi",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(product),
+            success: function (data) {
+                alert("Add success");
+                window.location.reload();
+            }
+        });
+
+
+     
+    }
+
+</script>
